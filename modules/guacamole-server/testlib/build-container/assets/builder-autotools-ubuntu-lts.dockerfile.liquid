@@ -1,0 +1,10 @@
+{% layout "builder-base-ubuntu-lts.dockerfile.liquid" %}
+
+{% block buildsystem %}
+# Install autotools build system
+#RUN --mount=type=cache,target=/var/cache/apt \
+RUN apt install -yq \
+        autoconf \
+        automake \
+        libtool
+{% endblock %}

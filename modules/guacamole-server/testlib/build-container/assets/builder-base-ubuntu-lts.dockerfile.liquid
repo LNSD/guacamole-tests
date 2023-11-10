@@ -1,0 +1,40 @@
+# syntax=docker/dockerfile:1
+FROM ubuntu:22.04 AS builder-base
+ENV LANG=en_US.UTF-8
+ENV SHELL=/bin/bash
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install build common requirements (git, make, gcc, etc.)
+#RUN --mount=type=cache,target=/var/cache/apt apt update \
+RUN apt update \
+    && apt install -yq --no-install-recommends \
+      locales && \
+      echo "$LANG UTF-8" >> /etc/locale.gen && \
+      locale-gen \
+    && apt install -yq \
+        build-essential \
+        git \
+        curl \
+        ca-certificates
+
+{% block buildsystem %}{% endblock %}
+
+{% if buildDeps.size > 0 %}
+# Install build dependencies
+#RUN --mount=type=cache,target=/var/cache/apt \
+RUN apt install -yq \
+{%- for dep in buildDeps %}
+    {{ dep }} \
+{%- endfor %}
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/*
+{% else %}
+# Skipped installing build dependencies
+{% endif %}
+
+# Build directory and container entrypoint
+RUN mkdir -p /build
+WORKDIR /build
+
+# Keep the container alive
+CMD ["sleep", "infinity"]
