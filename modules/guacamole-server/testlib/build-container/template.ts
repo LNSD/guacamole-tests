@@ -15,7 +15,7 @@ export type BuildDependency =
   | 'libcairo2-dev'
   | 'uuid-dev'
   | 'libossp-uuid-dev'
-  | 'libpango1.'
+  | 'libpango1.0-dev'
   | 'libssh2-1-dev'
   | 'libssl-dev'
   | 'libtelnet-dev'
@@ -26,7 +26,9 @@ export type BuildDependency =
   | 'libswscale-dev'
   | 'libavcodec-dev'
   | 'libavutil-dev'
-  | 'libavformat';
+  | 'libavformat-dev'
+  | 'freerdp2-dev'
+  | 'libvorbis-dev';
 
 export interface DockerfileParams {
   buildSystem: BuildSystem;
