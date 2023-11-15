@@ -4,7 +4,7 @@
   "dependencies": {
     "liquidjs": "^10.9.4",
     "tar-stream": "^3.1.6",
-    "testcontainers": "^10.2.2"
+    "testcontainers": "https://github.com/LNSD/testcontainers-node/releases/download/testcontainers-v10.3.0/testcontainers-10.3.0.tgz"
   },
   "devDependencies": {
     "@types/tar-stream": "^3.1.3"
