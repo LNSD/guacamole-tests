@@ -9,7 +9,9 @@
   "scripts": {
     "format": "prettier --write package.json \"modules/**/*.ts\"",
     "lint": "eslint --fix package.json \"modules/**/*.ts\"",
-    "test": "jest"
+    "lint:ci": "eslint package.json \"modules/**/*.ts\" --max-warnings=0",
+    "test": "jest",
+    "test:ci": "jest --ci --runInBand"
   },
   "devDependencies": {
     "@types/jest": "^29.5.8",
