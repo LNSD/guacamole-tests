@@ -20,7 +20,7 @@ describe('autotools build system', () => {
 
     /// When
     const config: AutotoolsConfig = { guacd: true };
-    let configOutput = await builder.run(
+    const configOutput = await builder.run(
       new Configure('/build/guacamole-server', config)
     );
 
@@ -53,7 +53,7 @@ describe('autotools build system', () => {
       guacd: true,
       libuuid: true,
     };
-    let configureOutput = await builder.run(
+    const configureOutput = await builder.run(
       new Configure('/build/guacamole-server', config)
     );
 
@@ -87,7 +87,7 @@ describe('autotools build system', () => {
       guacd: true,
       webp: true,
     };
-    let configureOutput = await builder.run(
+    const configureOutput = await builder.run(
       new Configure('/build/guacamole-server', config)
     );
 
@@ -121,7 +121,7 @@ describe('autotools build system', () => {
       guacd: true,
       pulse: true,
     };
-    let configureOutput = await builder.run(
+    const configureOutput = await builder.run(
       new Configure('/build/guacamole-server', config)
     );
 
@@ -155,7 +155,7 @@ describe('autotools build system', () => {
       guacd: true,
       vorbis: true,
     };
-    let configureOutput = await builder.run(
+    const configureOutput = await builder.run(
       new Configure('/build/guacamole-server', config)
     );
 
@@ -190,7 +190,7 @@ describe('autotools build system', () => {
       guacd: true,
       telnet: true,
     };
-    let configureOutput = await builder.run(
+    const configureOutput = await builder.run(
       new Configure('/build/guacamole-server', config)
     );
 
@@ -223,7 +223,7 @@ describe('autotools build system', () => {
 
     /// When
     const config: AutotoolsConfig = { guacd: true, ssh: true };
-    let configureOutput = await builder.run(
+    const configureOutput = await builder.run(
       new Configure('/build/guacamole-server', config)
     );
 
@@ -259,7 +259,7 @@ describe('autotools build system', () => {
       guacd: true,
       kubernetes: true,
     };
-    let configOutput = await builder.run(
+    const configOutput = await builder.run(
       new Configure('/build/guacamole-server', config)
     );
 
@@ -290,7 +290,7 @@ describe('autotools build system', () => {
 
     /// When
     const config: AutotoolsConfig = { guacd: true, vnc: true };
-    let configOutput = await builder.run(
+    const configOutput = await builder.run(
       new Configure('/build/guacamole-server', config)
     );
 
@@ -321,7 +321,7 @@ describe('autotools build system', () => {
 
     /// When
     const config: AutotoolsConfig = { guacd: true, vnc: true };
-    let configOutput = await builder.run(
+    const configOutput = await builder.run(
       new Configure('/build/guacamole-server', config)
     );
 
@@ -347,7 +347,7 @@ describe('autotools build system', () => {
 
     /// When
     const config: AutotoolsConfig = { guaclog: true };
-    let configureOutput = await builder.run(
+    const configureOutput = await builder.run(
       new Configure('/build/guacamole-server', config)
     );
 
@@ -380,7 +380,7 @@ describe('autotools build system', () => {
 
     /// When
     const config: AutotoolsConfig = { guacenc: true };
-    let configureOutput = await builder.run(
+    const configureOutput = await builder.run(
       new Configure('/build/guacamole-server', config)
     );
 
