@@ -1,6 +1,6 @@
 {
   "name": "guacamole-server-tests",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "dependencies": {
     "liquidjs": "^10.9.4",
     "tar-stream": "^3.1.6",
