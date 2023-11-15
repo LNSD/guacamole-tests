@@ -108,7 +108,7 @@ export interface AutotoolsConfig {
  * @param config - The config to enableconvert.
  */
 function intoArgs(config?: Partial<AutotoolsConfig>): string[] {
-  let args: string[] = [];
+  const args: string[] = [];
   if (!config?.guacd) {
     args.push('--disable-guacd');
   }
