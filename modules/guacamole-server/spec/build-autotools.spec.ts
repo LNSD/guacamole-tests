@@ -2,7 +2,8 @@ import { newBuilder } from '@testlib/build-container';
 import { AutotoolsConfig, Compile, Configure } from '@testlib/autotools';
 import { GitClone } from '@testlib/git';
 
-const GUAC_SERVER_GIT_FORK_URL = 'https://github.com/LNSD/guacamole-server.git';
+const GUAC_SERVER_GIT_REPO_URL =
+  'https://github.com/apache/guacamole-server.git';
 
 // Set the default timeout interval (in milliseconds) for all spec and
 // before/after hooks in this test file.
@@ -15,7 +16,7 @@ describe('autotools build system', () => {
       buildSystem: 'autotools',
       buildDeps: ['libpng-dev', 'libjpeg-turbo8-dev', 'libcairo2-dev'],
     });
-    await builder.run(new GitClone(GUAC_SERVER_GIT_FORK_URL, 'master'));
+    await builder.run(new GitClone(GUAC_SERVER_GIT_REPO_URL, 'master'));
 
     /// When
     const config: AutotoolsConfig = { guacd: true };
@@ -45,7 +46,7 @@ describe('autotools build system', () => {
         'uuid-dev',
       ],
     });
-    await builder.run(new GitClone(GUAC_SERVER_GIT_FORK_URL, 'master'));
+    await builder.run(new GitClone(GUAC_SERVER_GIT_REPO_URL, 'master'));
 
     /// When
     const config: AutotoolsConfig = {
@@ -79,7 +80,7 @@ describe('autotools build system', () => {
         'libwebp-dev',
       ],
     });
-    await builder.run(new GitClone(GUAC_SERVER_GIT_FORK_URL, 'master'));
+    await builder.run(new GitClone(GUAC_SERVER_GIT_REPO_URL, 'master'));
 
     /// When
     const config: AutotoolsConfig = {
@@ -113,7 +114,7 @@ describe('autotools build system', () => {
         'libpulse-dev',
       ],
     });
-    await builder.run(new GitClone(GUAC_SERVER_GIT_FORK_URL, 'master'));
+    await builder.run(new GitClone(GUAC_SERVER_GIT_REPO_URL, 'master'));
 
     /// When
     const config: AutotoolsConfig = {
@@ -147,7 +148,7 @@ describe('autotools build system', () => {
         'libvorbis-dev',
       ],
     });
-    await builder.run(new GitClone(GUAC_SERVER_GIT_FORK_URL, 'master'));
+    await builder.run(new GitClone(GUAC_SERVER_GIT_REPO_URL, 'master'));
 
     /// When
     const config: AutotoolsConfig = {
@@ -182,7 +183,7 @@ describe('autotools build system', () => {
         'libtelnet-dev',
       ],
     });
-    await builder.run(new GitClone(GUAC_SERVER_GIT_FORK_URL, 'master'));
+    await builder.run(new GitClone(GUAC_SERVER_GIT_REPO_URL, 'master'));
 
     /// When
     const config: AutotoolsConfig = {
@@ -218,7 +219,7 @@ describe('autotools build system', () => {
         'libssh2-1-dev',
       ],
     });
-    await builder.run(new GitClone(GUAC_SERVER_GIT_FORK_URL, 'master'));
+    await builder.run(new GitClone(GUAC_SERVER_GIT_REPO_URL, 'master'));
 
     /// When
     const config: AutotoolsConfig = { guacd: true, ssh: true };
@@ -251,7 +252,7 @@ describe('autotools build system', () => {
         'libwebsockets-dev',
       ],
     });
-    await builder.run(new GitClone(GUAC_SERVER_GIT_FORK_URL, 'master'));
+    await builder.run(new GitClone(GUAC_SERVER_GIT_REPO_URL, 'master'));
 
     /// When
     const config: AutotoolsConfig = {
@@ -285,7 +286,7 @@ describe('autotools build system', () => {
         'libvncserver-dev',
       ],
     });
-    await builder.run(new GitClone(GUAC_SERVER_GIT_FORK_URL, 'master'));
+    await builder.run(new GitClone(GUAC_SERVER_GIT_REPO_URL, 'master'));
 
     /// When
     const config: AutotoolsConfig = { guacd: true, vnc: true };
@@ -316,7 +317,7 @@ describe('autotools build system', () => {
         'freerdp2-dev',
       ],
     });
-    await builder.run(new GitClone(GUAC_SERVER_GIT_FORK_URL, 'master'));
+    await builder.run(new GitClone(GUAC_SERVER_GIT_REPO_URL, 'master'));
 
     /// When
     const config: AutotoolsConfig = { guacd: true, vnc: true };
@@ -342,7 +343,7 @@ describe('autotools build system', () => {
       buildSystem: 'autotools',
       buildDeps: ['libpng-dev', 'libjpeg-turbo8-dev', 'libcairo2-dev'],
     });
-    await builder.run(new GitClone(GUAC_SERVER_GIT_FORK_URL, 'master'));
+    await builder.run(new GitClone(GUAC_SERVER_GIT_REPO_URL, 'master'));
 
     /// When
     const config: AutotoolsConfig = { guaclog: true };
@@ -375,7 +376,7 @@ describe('autotools build system', () => {
         'libswscale-dev',
       ],
     });
-    await builder.run(new GitClone(GUAC_SERVER_GIT_FORK_URL, 'master'));
+    await builder.run(new GitClone(GUAC_SERVER_GIT_REPO_URL, 'master'));
 
     /// When
     const config: AutotoolsConfig = { guacenc: true };
