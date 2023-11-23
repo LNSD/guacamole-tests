@@ -1,0 +1,29 @@
+<user-mapping>
+  {% for usr in users %}
+    <authorize
+      username="{{- usr.username -}}"
+      password="{{- usr.password -}}"
+      {% if usr.passwordEncoding -%}
+        encoding="{{- usr.paswordEncoding -}}"
+      {%- endif %}
+    >
+      {% if usr.defaultConnection -%}
+        <!-- Default connection -->
+        <protocol>{{ usr.defaultConnection.protocol }}</protocol>
+        {% for param in usr.defaultConnection.params %}
+          <param name="{{- param[0] -}}">{{- param[1] -}}</param>
+        {% endfor %}
+      {%- endif %}
+
+      {% for conn in usr.connections %}
+        <!-- {{ conn[1].protocol | upcase }} connection "{{- conn[0] -}}"-->
+        <connection name="{{- conn[0] -}}">
+          <protocol>{{ conn[1].protocol | downcase }}</protocol>
+          {% for param in conn[1].params %}
+            <param name="{{- param[0] -}}">{{- param[1] -}}</param>
+          {% endfor %}
+        </connection>
+      {% endfor %}
+    </authorize>
+  {% endfor %}
+</user-mapping>
