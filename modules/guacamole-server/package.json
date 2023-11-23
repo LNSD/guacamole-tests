@@ -1,10 +1,15 @@
 {
-  "name": "guacamole-server-tests",
-  "version": "0.0.0",
+  "name": "@guacamole-tests/guacamole-server",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": "true",
+  "scripts": {
+    "test": "jest"
+  },
   "dependencies": {
     "liquidjs": "^10.9.4",
     "tar-stream": "^3.1.6",
-    "testcontainers": "https://github.com/LNSD/testcontainers-node/releases/download/testcontainers-v10.3.0/testcontainers-10.3.0.tgz"
+    "testcontainers": "https://github.com/LNSD/testcontainers-node/releases/download/testcontainers-v10.4.0/testcontainers-10.4.0.tgz"
   },
   "devDependencies": {
     "@types/tar-stream": "^3.1.3"
