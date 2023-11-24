@@ -2,7 +2,8 @@
   "name": "guacamole-tests",
   "license": "Apache-2.0",
   "workspaces": [
-    "modules/*"
+    "modules/*",
+    "e2e"
   ],
   "scripts": {
     "commitlint": "commitlint --edit",

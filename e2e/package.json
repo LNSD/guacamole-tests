@@ -1,0 +1,16 @@
+{
+  "name": "@guacamole-tests/e2e",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": "true",
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "testcontainers": "https://github.com/LNSD/testcontainers-node/releases/download/testcontainers-v10.4.0/testcontainers-10.4.0.tgz",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.7"
+  }
+}
