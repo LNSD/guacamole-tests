@@ -4,7 +4,8 @@
   "license": "Apache-2.0",
   "private": "true",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc -p tsconfig.testlib.json"
   },
   "dependencies": {
     "liquidjs": "^10.9.4",

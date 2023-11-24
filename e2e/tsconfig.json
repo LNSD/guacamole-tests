@@ -1,12 +1,18 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "../dist/out-tsc",
-    "types": ["jest", "node"],
-    "baseUrl": ".",
-    "paths": {
-      "@testlib/*": ["./testlib/*"],
-    }
+    "composite": true,
+    "rootDir": "./",
+    "outDir": "../dist/out-tsc/e2e/",
   },
+  "references": [
+    {
+      "path": "tsconfig.testlib.json"
+    },
+    {
+      "path": "tsconfig.spec.json"
+    }
+  ],
   "exclude": ["jest.config.ts"]
 }

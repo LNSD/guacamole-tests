@@ -8,7 +8,7 @@ jest.setTimeout(120_000); // 2 minutes
 describe('Guacamole client container', () => {
   it('should be able start a Guacamole client container', async () => {
     /// Given
-    const authConf = await renderUserMappingConf([]);
+    const authConf = renderUserMappingConf([]);
     const containerName = `guac-client-${uuid()}`;
 
     const guacamoleClient = new GuacClientContainer()

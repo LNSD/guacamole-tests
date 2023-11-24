@@ -4,7 +4,8 @@
   "license": "Apache-2.0",
   "private": "true",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc -p tsconfig.testlib.json"
   },
   "dependencies": {
     "testcontainers": "https://github.com/LNSD/testcontainers-node/releases/download/testcontainers-v10.4.0/testcontainers-10.4.0.tgz",

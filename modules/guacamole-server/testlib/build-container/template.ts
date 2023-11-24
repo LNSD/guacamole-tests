@@ -35,13 +35,11 @@ export interface DockerfileParams {
   buildDeps?: BuildDependency[];
 }
 
-export async function renderDockerfile(
-  params: DockerfileParams
-): Promise<string> {
-  return await engine.renderFile(
+export function renderDockerfile(params: DockerfileParams): string {
+  return engine.renderFileSync(
     `builder-${params.buildSystem}-ubuntu-lts.dockerfile.liquid`,
     {
       buildDeps: params.buildDeps,
     }
-  );
+  ) as string;
 }

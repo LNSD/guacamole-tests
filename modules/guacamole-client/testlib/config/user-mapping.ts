@@ -5,16 +5,16 @@ export interface UserMapping {
   password: string;
   passwordEncoding?: 'md5';
   defaultConnection?: Connection;
-  connections?: { [key: string]: Connection };
+  connections?: Record<string, Connection>;
 }
 
 export interface Connection {
   protocol: string;
-  params: { [key: string]: string | number | boolean };
+  params: Record<string, string | number | boolean>;
 }
 
-export async function renderUserMappingConf(
-  users: UserMapping[]
-): Promise<string> {
-  return await engine.renderFile(`user-mapping.xml.liquid`, { users });
+export function renderUserMappingConf(users: UserMapping[]): string {
+  return engine.renderFileSync(`user-mapping.xml.liquid`, {
+    users,
+  }) as string;
 }

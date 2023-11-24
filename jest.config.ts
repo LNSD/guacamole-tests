@@ -6,6 +6,7 @@ const config: Config = {
     '<rootDir>/e2e/jest.config.ts',
   ],
   testEnvironment: 'node',
+  passWithNoTests: true,
 };
 
 export default config;
