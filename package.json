@@ -8,8 +8,8 @@
   "scripts": {
     "commitlint": "commitlint --edit",
     "format": "prettier --write package.json \"modules/**/*.ts\"",
-    "lint": "eslint package.json \"modules/**/*.ts\" --fix",
-    "lint:ci": "eslint package.json \"modules/**/*.ts\" --max-warnings=0",
+    "lint": "eslint modules e2e --fix",
+    "lint:ci": "eslint modules e2e --max-warnings=0",
     "test": "jest",
     "test:ci": "jest --ci --runInBand",
     "prepare": "husky install .github/hooks"
