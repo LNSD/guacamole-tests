@@ -1,6 +1,8 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compileOnSave": false,
   "compilerOptions": {
+    "outDir": "./dist",
     "incremental": true,
     "target": "es2022",
     "module": "commonjs",
@@ -14,5 +16,19 @@
     "noImplicitOverride": true,
     "composite": true
   },
-  "exclude": ["node_modules", "tmp"]
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+  "references": [
+    {
+      "path": "./modules/guacamole-client/tsconfig.json"
+    },
+    {
+      "path": "./modules/guacamole-server/tsconfig.json"
+    },
+    {
+      "path": "./e2e/tsconfig.json"
+    }
+  ]
 }

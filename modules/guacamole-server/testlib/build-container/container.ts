@@ -10,7 +10,7 @@ export class GuacServerBuilderContainer extends GenericContainer {
     const imageTag = `guacamole-server-builder:${params.buildSystem}-ubuntu-lts`;
 
     // Generate the Dockerfile and the context
-    const dockerfile = await renderDockerfile(params);
+    const dockerfile = renderDockerfile(params);
     console.debug(dockerfile); // TODO: Add logging framework
 
     const dockerContext = tar.pack();

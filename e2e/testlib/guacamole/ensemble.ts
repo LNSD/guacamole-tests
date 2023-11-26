@@ -137,6 +137,7 @@ export class GuacamoleStartedEnsemble
           record[name] = service;
           return record;
         },
+        // eslint-disable-next-line @typescript-eslint/prefer-reduce-type-parameter
         {} as Record<GuacamoleServiceNames, StartedTestContainer>
       )
     );
@@ -153,6 +154,7 @@ export class GuacamoleStartedEnsemble
           acc[name] = network;
           return acc;
         },
+        // eslint-disable-next-line @typescript-eslint/prefer-reduce-type-parameter
         {} as Record<GuacamoleNetworkNames, StartedNetwork>
       )
     );

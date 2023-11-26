@@ -44,8 +44,8 @@ export interface GuacdConfiguration {
  * By default, the official image's latest version is used.
  */
 export class GuacClientContainer extends GenericContainer {
-  private auth: boolean = false;
-  private guacd: boolean = false;
+  private auth = false;
+  private guacd = false;
 
   constructor(imageTag = GUACAMOLE_CLIENT_IMAGE) {
     super(imageTag);

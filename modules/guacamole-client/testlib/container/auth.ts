@@ -17,7 +17,7 @@ export interface AuthConfiguration {
 export class UserMappingXmlAuth implements AuthConfiguration {
   constructor(
     private readonly conf: string,
-    private readonly home: string = '/etc/guacamole'
+    private readonly home = '/etc/guacamole'
   ) {}
 
   configure(container: TestContainer) {

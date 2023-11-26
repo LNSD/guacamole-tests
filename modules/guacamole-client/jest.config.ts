@@ -6,6 +6,14 @@ const config: JestConfigWithTsJest = {
   moduleNameMapper: {
     '^@testlib/(.*)$': '<rootDir>/testlib/$1',
   },
+  transform: {
+    '^.+\\.m?tsx?$': [
+      'ts-jest',
+      {
+        tsconfig: '<rootDir>/tsconfig.spec.json',
+      },
+    ],
+  },
 };
 
 export default config;
