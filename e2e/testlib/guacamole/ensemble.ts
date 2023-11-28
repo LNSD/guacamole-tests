@@ -1,31 +1,17 @@
 import {
+  Network,
   StartedNetwork,
   StartedTestContainer,
   StoppableNetwork,
+  TestContainer,
 } from 'testcontainers';
-import {
-  Ensemble,
-  EnsembleService,
-  EnsembleNetworks,
-  EnsembleStartedServices,
-  EnsembleStartedNetworks,
-  StartedEnsemble,
-  EnsembleServiceName,
-  EnsembleNetworkName,
-} from '../ensemble';
-import {
-  defaultNetworks,
-  GuacamoleEnsembleStartedNetworks,
-  GuacamoleNetworkNames,
-  GuacamoleNetworksProvider,
-} from './networks';
+import { defaultNetworks, GuacamoleNetworkNames } from './networks';
 import { v4 as uuid } from 'uuid';
+import { defaultServices, GuacamoleServiceNames } from './services';
 import {
-  defaultServices,
-  GuacamoleEnsembleStartedServices,
-  GuacamoleServiceNames,
-  GuacamoleServicesProvider,
-} from './services';
+  EnsembleNetworksProvider,
+  EnsembleServicesProvider,
+} from '../ensemble';
 
 /**
  * Start sequentially all the networks in the ensemble.
@@ -33,16 +19,12 @@ import {
  * @param networks - The networks to start.
  * @returns A promise that resolves when all the networks have started.
  */
-async function startNetworks<
-  Names extends EnsembleNetworkName = EnsembleNetworkName,
->(networks: EnsembleNetworks<Names>): Promise<EnsembleStartedNetworks<Names>> {
-  const started = [];
-  for (const n of networks.map(
-    async ([name, net]): Promise<
-      [Names, StartedNetwork & StoppableNetwork]
-    > => [name, await net.start()]
-  )) {
-    started.push(await n);
+async function startNetworks<Names extends string = string>(
+  networks: Map<Names, Network>
+): Promise<Map<Names, StartedNetwork & StoppableNetwork>> {
+  const started = new Map<Names, StartedNetwork & StoppableNetwork>();
+  for (const [name, network] of networks) {
+    started.set(name, await network.start());
   }
   return started;
 }
@@ -53,17 +35,12 @@ async function startNetworks<
  * @param services - The services to start.
  * @returns A promise that resolves when all the services have started.
  */
-async function startServices<
-  Names extends EnsembleServiceName = EnsembleServiceName,
->(services: EnsembleService<Names>): Promise<EnsembleStartedServices<Names>> {
-  const started = [];
-  for (const n of services.map(
-    async ([name, svc]): Promise<[Names, StartedTestContainer]> => [
-      name,
-      await svc.start(),
-    ]
-  )) {
-    started.push(await n);
+async function startServices<Names extends string = string>(
+  services: Map<Names, TestContainer>
+): Promise<Map<Names, StartedTestContainer>> {
+  const started = new Map<Names, StartedTestContainer>();
+  for (const [name, service] of services) {
+    started.set(name, await service.start());
   }
   return started;
 }
@@ -71,20 +48,67 @@ async function startServices<
 /**
  * An ensemble of Guacamole services.
  */
-// TODO: Add a way to configure the ensemble
-//  - Configure the Guacamole client (.withGuacamoleClient(...))
-//  - Configure the Guacamole server (.withGuacdServer(...))
-//  - Add a fixture container (.withFixtureContainer(...))
-
-export class GuacamoleEnsemble
-  implements Ensemble<GuacamoleNetworkNames, GuacamoleServiceNames>
-{
+export class GuacamoleEnsemble {
   private readonly _id?: string;
-  private networksProvider?: GuacamoleNetworksProvider;
-  private servicesProvider?: GuacamoleServicesProvider;
+  private readonly networkProviders: Array<
+    EnsembleNetworksProvider<GuacamoleNetworkNames>
+  > = [];
+  private readonly servicesProviders: Array<
+    EnsembleServicesProvider<GuacamoleServiceNames, GuacamoleNetworkNames>
+  > = [];
 
   constructor(id?: string) {
     this._id = id;
+  }
+
+  /**
+   * Set the ensemble networks provider.
+   *
+   * If called multiple times, the networks provided will be merged before
+   * started.
+   *
+   * @param provider - A function that returns a map of networks ready to be
+   *                   started.
+   */
+  private withNetworks(
+    provider: EnsembleNetworksProvider<GuacamoleNetworkNames>
+  ): this {
+    this.networkProviders.push(provider);
+    return this;
+  }
+
+  /**
+   * Set the default ensemble networks provider.
+   */
+  public withDefaultNetworks(): this {
+    this.withNetworks(defaultNetworks);
+    return this;
+  }
+
+  /**
+   * Set the ensemble services provider.
+   *
+   * If called multiple times, the services provided are merged.
+   *
+   * @param provider - A function that returns a map of services ready to be
+   *                   started.
+   */
+  private withServices(
+    provider: EnsembleServicesProvider<
+      GuacamoleServiceNames,
+      GuacamoleNetworkNames
+    >
+  ): this {
+    this.servicesProviders.push(provider);
+    return this;
+  }
+
+  /**
+   * Set the default ensemble services provider.
+   */
+  public withDefaultServices(): this {
+    this.withServices(defaultServices);
+    return this;
   }
 
   /**
@@ -94,105 +118,114 @@ export class GuacamoleEnsemble
    *
    * @returns A promise that resolves when the ensemble has started.
    */
-  async start(id?: string): Promise<GuacamoleStartedEnsemble> {
+  public async start(id?: string): Promise<GuacamoleStartedEnsemble> {
     const ensembleId = id ?? this._id ?? uuid();
 
     // Create the networks and start them.
-    const networksProvider = this.networksProvider ?? defaultNetworks;
-    const networks = await startNetworks(networksProvider(ensembleId));
+    const networks = this.networkProviders.reduce<
+      Map<GuacamoleNetworkNames, Network>
+    >((networks, provider) => {
+      provider(ensembleId).forEach((value, key) => networks.set(key, value));
+      return networks;
+    }, new Map());
+    if (networks.size === 0) {
+      throw new Error('No networks provided');
+    }
+    const startedNetworks = await startNetworks(networks);
 
     // Create the services and start them.
-    const servicesProvider = this.servicesProvider ?? defaultServices;
-    const services = await startServices(
-      servicesProvider(ensembleId, networks)
-    );
+    const services = this.servicesProviders.reduce<
+      Map<GuacamoleServiceNames, TestContainer>
+    >((services, provider) => {
+      provider(ensembleId, startedNetworks).forEach((value, key) =>
+        services.set(key, value)
+      );
+      return services;
+    }, new Map());
+    if (services.size === 0) {
+      throw new Error('No services provided');
+    }
+    const startedServices = await startServices(services);
 
-    return new GuacamoleStartedEnsemble(networks, services);
+    return new GuacamoleStartedEnsemble(startedNetworks, startedServices);
   }
 }
 
 /**
  * A started ensemble of Guacamole services.
  */
-export class GuacamoleStartedEnsemble
-  implements StartedEnsemble<GuacamoleNetworkNames, GuacamoleServiceNames>
-{
-  private stopped = false;
+export class GuacamoleStartedEnsemble {
+  private started = true;
 
   constructor(
-    private readonly _networks: GuacamoleEnsembleStartedNetworks,
-    private readonly _services: GuacamoleEnsembleStartedServices
+    private readonly _networks: Map<
+      GuacamoleNetworkNames,
+      StartedNetwork & StoppableNetwork
+    >,
+    private readonly _services: Map<GuacamoleServiceNames, StartedTestContainer>
   ) {}
-
-  /**
-   * A map of service names to containers.
-   */
-  get services(): Readonly<
-    Record<GuacamoleServiceNames, StartedTestContainer>
-  > {
-    // Return a frozen services map to prevent mutation.
-    return Object.freeze(
-      this._services.reduce(
-        (record, [name, service]) => {
-          record[name] = service;
-          return record;
-        },
-        // eslint-disable-next-line @typescript-eslint/prefer-reduce-type-parameter
-        {} as Record<GuacamoleServiceNames, StartedTestContainer>
-      )
-    );
-  }
 
   /**
    * A map of network names to network instances.
    */
-  get networks(): Readonly<Record<GuacamoleNetworkNames, StartedNetwork>> {
-    // Return a frozen networks map to prevent mutation.
-    return Object.freeze(
-      this._networks.reduce(
-        (acc, [name, network]) => {
-          acc[name] = network;
-          return acc;
-        },
-        // eslint-disable-next-line @typescript-eslint/prefer-reduce-type-parameter
-        {} as Record<GuacamoleNetworkNames, StartedNetwork>
-      )
-    );
+  get networks(): Readonly<Map<GuacamoleNetworkNames, StartedNetwork>> {
+    // Return a frozen map object to prevent mutation.
+    return Object.freeze(this._networks);
   }
 
   /**
-   * Check if the ensemble has been stopped.
+   * A map of service names to containers.
    */
-  isStopped(): boolean {
-    return this.stopped;
+  get services(): Readonly<Map<GuacamoleServiceNames, StartedTestContainer>> {
+    // Return a frozen services map to prevent mutation.
+    return Object.freeze(this._services);
+  }
+
+  /**
+   * Check if the ensemble is started.
+   */
+  public isStarted(): boolean {
+    return this.started;
   }
 
   /**
    * Stop the ensemble.
    *
    * This will stop and remove all the ensemble containers and networks. If
-   * the ensemble is already stopped, this is a no-op.
+   * the ensemble is already started, this is a no-op.
    *
-   * @returns A promise that resolves when the ensemble has stopped.
+   * @returns A promise that resolves when the ensemble has started.
    */
   async stop(): Promise<void> {
-    if (this.stopped) {
+    if (!this.started) {
       return;
     }
 
-    // Services are stopped sequentially in reverse order to avoid stopping a
+    // Services are started sequentially in reverse order to avoid stopping a
     // service that is depended on by another service.
-    for (let i = this._services.length - 1; i >= 0; i--) {
-      const [, service] = this._services[i];
+    const serviceNames = Array.from(this._services.keys());
+    for (let i = serviceNames.length - 1; i >= 0; i--) {
+      const name = serviceNames[i];
+      const service = this._services.get(name);
+      if (!service) {
+        continue;
+      }
+
       await service.stop();
     }
 
-    // Stop all the networks sequentially in reverse order.
-    for (let i = this._networks.length - 1; i >= 0; i--) {
-      const [, network] = this._networks[i];
+    // // Stop all the networks sequentially in reverse order.
+    const networkNames = Array.from(this._networks.keys());
+    for (let i = networkNames.length - 1; i >= 0; i--) {
+      const name = networkNames[i];
+      const network = this._networks.get(name);
+      if (!network) {
+        continue;
+      }
+
       await network.stop();
     }
 
-    this.stopped = true;
+    this.started = false;
   }
 }
