@@ -1,14 +1,10 @@
-import {
-  EnsembleStartedNetworks,
-  EnsembleServicesProvider,
-  EnsembleStartedServices,
-} from '../ensemble';
+import { EnsembleServicesProvider } from '../ensemble';
 import { GuacdContainer } from '@guacamole-tests/guacamole-server/testlib/container';
 import {
   GuacClientContainer,
   UserMappingXmlAuth,
 } from '@guacamole-tests/guacamole-client/testlib/container';
-import { Wait } from 'testcontainers';
+import { TestContainer, Wait } from 'testcontainers';
 import { GuacamoleNetworkNames } from '@testlib/guacamole/networks';
 
 /**
@@ -16,12 +12,9 @@ import { GuacamoleNetworkNames } from '@testlib/guacamole/networks';
  */
 export type GuacamoleServiceNames = 'guac-proxy' | 'guac-server';
 
-export type GuacamoleEnsembleStartedServices =
-  EnsembleStartedServices<GuacamoleServiceNames>;
-
 export type GuacamoleServicesProvider = EnsembleServicesProvider<
   GuacamoleServiceNames,
-  EnsembleStartedNetworks<GuacamoleNetworkNames>
+  GuacamoleNetworkNames
 >;
 
 /**
@@ -29,21 +22,31 @@ export type GuacamoleServicesProvider = EnsembleServicesProvider<
  * be started.
  */
 export const defaultServices: GuacamoleServicesProvider = (id, networks) => {
-  // TODO: Fix service provider provide a way to access the network by name safely
-  //   The following code is not safe, it assumes that the network entries are
-  //   present. It will throw a TypeError if the network entry is not present.
-  const [[, guacamoleNetwork]] = networks.filter(
-    ([name]) => name === 'guacamole'
-  );
-  const [[, ingressNetwork]] = networks.filter(([name]) => name === 'ingress');
-  const [[, fixturesNetwork]] = networks.filter(
-    ([name]) => name === 'fixtures'
-  );
+  const guacamoleNetwork = networks.get('guacamole');
+  if (!guacamoleNetwork) {
+    throw new Error(`Guacamole network not found in the provided networks`);
+  }
+
+  const ingressNetwork = networks.get('ingress');
+  if (!ingressNetwork) {
+    throw new Error(`Ingress network not found in the provided networks`);
+  }
+
+  const fixturesNetwork = networks.get('fixtures');
+  if (!fixturesNetwork) {
+    throw new Error(`Fixtures network not found in the provided networks`);
+  }
+
+  // Specify the services to start
+  const services = new Map<GuacamoleServiceNames, TestContainer>();
 
   const guacd = new GuacdContainer()
     .withName(`guac-proxy-${id}`)
     .withNetwork(guacamoleNetwork)
-    .withNetwork(fixturesNetwork);
+    .withNetwork(fixturesNetwork)
+    .withExposedPorts(4822)
+    .withWaitStrategy(Wait.forListeningPorts());
+  services.set('guac-proxy', guacd);
 
   const guacamoleClient = new GuacClientContainer()
     .withName(`guac-server-${id}`)
@@ -53,10 +56,8 @@ export const defaultServices: GuacamoleServicesProvider = (id, networks) => {
     .withNetwork(guacamoleNetwork)
     .withNetwork(ingressNetwork)
     .withExposedPorts(8080)
-    .withWaitStrategy(Wait.forHttp('/guacamole', 200));
+    .withWaitStrategy(Wait.forHttp('/guacamole', 8080));
+  services.set('guac-server', guacamoleClient);
 
-  return [
-    ['guac-proxy', guacd],
-    ['guac-server', guacamoleClient],
-  ];
+  return services;
 };
