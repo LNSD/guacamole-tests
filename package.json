@@ -11,8 +11,9 @@
     "lint": "eslint modules e2e --fix",
     "lint:ci": "eslint modules e2e --max-warnings=0",
     "build": "npm run build --workspaces --if-present",
-    "test": "jest",
-    "test:ci": "jest --ci --runInBand",
+    "test:e2e": "jest e2e",
+    "test:modules": "jest modules",
+    "test": "npm run test:modules; npm run test:e2e",
     "prepare": "husky install .github/hooks",
     "clean": "rimraf ./dist"
   },
