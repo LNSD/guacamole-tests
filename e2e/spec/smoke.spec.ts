@@ -78,8 +78,7 @@ describe('VNC server fixture', () => {
             'xvfb',
             'pulseaudio',
             'x11vnc',
-            'fluxbox',
-            'chrome'
+            'fluxbox'
           ),
         ])
       )
