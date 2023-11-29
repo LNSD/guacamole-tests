@@ -5,13 +5,21 @@ import {
   StoppableNetwork,
   TestContainer,
 } from 'testcontainers';
-import { defaultNetworks, GuacamoleNetworkNames } from './networks';
+import { defaultNetworks } from './networks';
 import { v4 as uuid } from 'uuid';
-import { defaultServices, GuacamoleServiceNames } from './services';
+import { defaultServices } from './services';
 import {
-  EnsembleNetworksProvider,
-  EnsembleServicesProvider,
+  Ensemble,
+  EnsembleError,
+  EnsembleNetworkProvider,
+  EnsembleServiceProvider,
+  StartedEnsemble,
 } from '../ensemble';
+
+export type FixtureServiceProvider = (
+  ensembleId: string,
+  fixtureNetwork: StartedNetwork
+) => [string, TestContainer];
 
 /**
  * Start sequentially all the networks in the ensemble.
@@ -48,14 +56,10 @@ async function startServices<Names extends string = string>(
 /**
  * An ensemble of Guacamole services.
  */
-export class GuacamoleEnsemble {
+export class GuacamoleEnsemble implements Ensemble {
   private readonly _id?: string;
-  private readonly networkProviders: Array<
-    EnsembleNetworksProvider<GuacamoleNetworkNames>
-  > = [];
-  private readonly servicesProviders: Array<
-    EnsembleServicesProvider<GuacamoleServiceNames, GuacamoleNetworkNames>
-  > = [];
+  private readonly networkProviders: EnsembleNetworkProvider[] = [];
+  private readonly servicesProviders: EnsembleServiceProvider[] = [];
 
   constructor(id?: string) {
     this._id = id;
@@ -67,21 +71,11 @@ export class GuacamoleEnsemble {
    * If called multiple times, the networks provided will be merged before
    * started.
    *
-   * @param provider - A function that returns a map of networks ready to be
-   *                   started.
+   * @param providers - A function that returns a map of networks ready to be
+   *                    started.
    */
-  private withNetworks(
-    provider: EnsembleNetworksProvider<GuacamoleNetworkNames>
-  ): this {
-    this.networkProviders.push(provider);
-    return this;
-  }
-
-  /**
-   * Set the default ensemble networks provider.
-   */
-  public withDefaultNetworks(): this {
-    this.withNetworks(defaultNetworks);
+  private withNetworks(...providers: EnsembleNetworkProvider[]): this {
+    this.networkProviders.push(...providers);
     return this;
   }
 
@@ -93,13 +87,16 @@ export class GuacamoleEnsemble {
    * @param provider - A function that returns a map of services ready to be
    *                   started.
    */
-  private withServices(
-    provider: EnsembleServicesProvider<
-      GuacamoleServiceNames,
-      GuacamoleNetworkNames
-    >
-  ): this {
-    this.servicesProviders.push(provider);
+  private withServices(...provider: EnsembleServiceProvider[]): this {
+    this.servicesProviders.push(...provider);
+    return this;
+  }
+
+  /**
+   * Set the default ensemble networks provider.
+   */
+  public withDefaultNetworks(): this {
+    this.withNetworks(...defaultNetworks());
     return this;
   }
 
@@ -107,68 +104,105 @@ export class GuacamoleEnsemble {
    * Set the default ensemble services provider.
    */
   public withDefaultServices(): this {
-    this.withServices(defaultServices);
+    this.withServices(...defaultServices());
+    return this;
+  }
+
+  /**
+   * Set the fixture services provider.
+   *
+   * @param provider - A function that returns a map of fixture services ready to be started.
+   */
+  public withFixtureServices(...provider: FixtureServiceProvider[]): this {
+    // Wrap the fixture provider with a service provider that provides the
+    // fixture network.
+    const serviceProviders: EnsembleServiceProvider[] = provider.map(
+      (fixtureProvider) => (ensembleId, networks) => {
+        const fixtureNetwork = networks.get('fixtures');
+        if (!fixtureNetwork) {
+          throw new EnsembleError('Fixtures network not found');
+        }
+
+        return fixtureProvider(ensembleId, fixtureNetwork);
+      }
+    );
+    this.withServices(...serviceProviders);
+
     return this;
   }
 
   /**
    * Start the ensemble.
    *
-   * This can be called multiple times to start multiple ensembles.
+   * This can be called multiple times to start multiple ensemble instances.
    *
    * @returns A promise that resolves when the ensemble has started.
    */
-  public async start(id?: string): Promise<GuacamoleStartedEnsemble> {
+  async start(id?: string): Promise<GuacamoleStartedEnsemble> {
     const ensembleId = id ?? this._id ?? uuid();
 
     // Create the networks and start them.
-    const networks = this.networkProviders.reduce<
-      Map<GuacamoleNetworkNames, Network>
-    >((networks, provider) => {
-      provider(ensembleId).forEach((value, key) => networks.set(key, value));
-      return networks;
-    }, new Map());
+    const networks = this.networkProviders.reduce<Map<string, Network>>(
+      (networks, provider) => {
+        const [key, net] = provider(ensembleId);
+        networks.set(key, net);
+        return networks;
+      },
+      new Map()
+    );
     if (networks.size === 0) {
-      throw new Error('No networks provided');
+      throw new EnsembleError('No networks provided');
     }
     const startedNetworks = await startNetworks(networks);
 
     // Create the services and start them.
-    const services = this.servicesProviders.reduce<
-      Map<GuacamoleServiceNames, TestContainer>
-    >((services, provider) => {
-      provider(ensembleId, startedNetworks).forEach((value, key) =>
-        services.set(key, value)
-      );
-      return services;
-    }, new Map());
+    const services = this.servicesProviders.reduce<Map<string, TestContainer>>(
+      (services, provider) => {
+        const [key, svc] = provider(ensembleId, startedNetworks);
+        services.set(key, svc);
+        return services;
+      },
+      new Map()
+    );
     if (services.size === 0) {
-      throw new Error('No services provided');
+      throw new EnsembleError('No services provided');
     }
     const startedServices = await startServices(services);
 
-    return new GuacamoleStartedEnsemble(startedNetworks, startedServices);
+    return new GuacamoleStartedEnsemble(
+      ensembleId,
+      startedNetworks,
+      startedServices
+    );
   }
 }
 
 /**
  * A started ensemble of Guacamole services.
  */
-export class GuacamoleStartedEnsemble {
+export class GuacamoleStartedEnsemble implements StartedEnsemble {
   private started = true;
 
   constructor(
-    private readonly _networks: Map<
-      GuacamoleNetworkNames,
-      StartedNetwork & StoppableNetwork
-    >,
-    private readonly _services: Map<GuacamoleServiceNames, StartedTestContainer>
+    private readonly _ensembleId: string,
+    private readonly _networks: Map<string, StartedNetwork & StoppableNetwork>,
+    private readonly _services: Map<string, StartedTestContainer>
   ) {}
+
+  /**
+   * The ensemble ID.
+   *
+   * This is a unique identifier for the ensemble. It is generated when the
+   * ensemble is started.
+   */
+  get id(): string {
+    return this._ensembleId;
+  }
 
   /**
    * A map of network names to network instances.
    */
-  get networks(): Readonly<Map<GuacamoleNetworkNames, StartedNetwork>> {
+  get networks(): Readonly<Map<string, StartedNetwork>> {
     // Return a frozen map object to prevent mutation.
     return Object.freeze(this._networks);
   }
@@ -176,7 +210,7 @@ export class GuacamoleStartedEnsemble {
   /**
    * A map of service names to containers.
    */
-  get services(): Readonly<Map<GuacamoleServiceNames, StartedTestContainer>> {
+  get services(): Readonly<Map<string, StartedTestContainer>> {
     // Return a frozen services map to prevent mutation.
     return Object.freeze(this._services);
   }
@@ -184,7 +218,7 @@ export class GuacamoleStartedEnsemble {
   /**
    * Check if the ensemble is started.
    */
-  public isStarted(): boolean {
+  isStarted(): boolean {
     return this.started;
   }
 
