@@ -1,4 +1,3 @@
-import { EnsembleServiceProvider } from '../ensemble';
 import { GuacdContainer } from '@guacamole-tests/guacamole-server/testlib/container';
 import {
   GuacClientContainer,
@@ -17,6 +16,19 @@ export type GuacdServiceProvider = (
   fixturesNetwork: StartedNetwork
 ) => [string, TestContainer];
 
+export type GuacamoleClientServiceProvider = (
+  ensembleId: string,
+  guacamoleNetwork: StartedNetwork,
+  ingressNetwork: StartedNetwork
+) => [string, TestContainer];
+
+/**
+ * A function that provides a guacd service.
+ *
+ * @param ensembleId - The ensemble ID.
+ * @param guacamoleNetwork - The Guacamole network.
+ * @param fixturesNetwork - The fixtures network.
+ */
 export const defaultGuacdService: GuacdServiceProvider = (
   ensembleId,
   guacamoleNetwork,
@@ -36,22 +48,14 @@ export const defaultGuacdService: GuacdServiceProvider = (
  * A function that provides a Guacamole client service.
  *
  * @param ensembleId - The ensemble ID.
- * @param networks - The ensemble networks.
+ * @param guacamoleNetwork - The Guacamole network.
+ * @param ingressNetwork - The ingress network.
  */
-export const defaultGuacamoleClientService: EnsembleServiceProvider = (
+export const defaultGuacamoleClientService: GuacamoleClientServiceProvider = (
   ensembleId,
-  networks
+  guacamoleNetwork,
+  ingressNetwork
 ) => {
-  const guacamoleNetwork = networks.get('guacamole');
-  if (!guacamoleNetwork) {
-    throw new Error(`Guacamole network not found in the provided networks`);
-  }
-
-  const ingressNetwork = networks.get('ingress');
-  if (!ingressNetwork) {
-    throw new Error(`Ingress network not found in the provided networks`);
-  }
-
   const guacamoleClient = new GuacClientContainer()
     .withName(`guac-server-${ensembleId}`)
     .withAuthConfiguration(
@@ -64,11 +68,3 @@ export const defaultGuacamoleClientService: EnsembleServiceProvider = (
 
   return ['guac-server', guacamoleClient];
 };
-
-/**
- * A function that returns the Guacamole ensemble array of services ready to
- * be started.
- */
-export function defaultServices(): EnsembleServiceProvider[] {
-  return [defaultGuacamoleClientService];
-}

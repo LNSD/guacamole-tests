@@ -18,7 +18,7 @@ describe('Guacamole ensemble start and stop', () => {
     ensemble = await new GuacamoleEnsemble()
       .withDefaultNetworks()
       .withDefaultServices()
-      .withFixtureServices((ensembleId, fixtureNetwork) => {
+      .withFixtureService((ensembleId, fixtureNetwork) => {
         const vncServer = new VncServerContainer()
           .withName(`vnc-server-${ensembleId}`)
           .withNetwork(fixtureNetwork)

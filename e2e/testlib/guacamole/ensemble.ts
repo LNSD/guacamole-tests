@@ -8,8 +8,8 @@ import {
 import { defaultNetworks } from './networks';
 import { v4 as uuid } from 'uuid';
 import {
+  defaultGuacamoleClientService,
   defaultGuacdService,
-  defaultServices,
   FixtureServiceProvider,
   GuacdServiceProvider,
 } from './services';
@@ -105,7 +105,7 @@ export class GuacamoleEnsemble implements Ensemble {
    */
   public withDefaultServices(): this {
     this.withGuacdService(defaultGuacdService);
-    this.withServices(...defaultServices());
+    this.withGuacamoleClientService(defaultGuacamoleClientService);
     return this;
   }
 
@@ -115,9 +115,8 @@ export class GuacamoleEnsemble implements Ensemble {
    * @param provider - A function that returns a guacd service ready to be started.
    */
   public withGuacdService(provider: GuacdServiceProvider): this {
-    // Wrap the guacd provider with a service provider that provides the
-    // guacamole and fixtures networks.
-    const serviceProvider: EnsembleServiceProvider = (ensembleId, networks) => {
+    // Wrap the guacd service provider with a function that provides the guacamole and fixtures networks.
+    this.withServices((ensembleId, networks) => {
       const guacamoleNetwork = networks.get('guacamole');
       if (!guacamoleNetwork) {
         throw new EnsembleError('Guacamole network not found');
@@ -129,8 +128,31 @@ export class GuacamoleEnsemble implements Ensemble {
       }
 
       return provider(ensembleId, guacamoleNetwork, fixturesNetwork);
-    };
-    this.withServices(serviceProvider);
+    });
+
+    return this;
+  }
+
+  /**
+   * Set the guacamole client service provider.
+   *
+   * @param provider - A function that returns a guacamole client service ready to be started.
+   */
+  public withGuacamoleClientService(provider: GuacdServiceProvider): this {
+    // Wrap the guacamole client service provider with a function that provides the guacamole and ingress networks.
+    this.withServices((ensembleId, networks) => {
+      const guacamoleNetwork = networks.get('guacamole');
+      if (!guacamoleNetwork) {
+        throw new EnsembleError('Guacamole network not found');
+      }
+
+      const ingressNetwork = networks.get('ingress');
+      if (!ingressNetwork) {
+        throw new EnsembleError('Ingress network not found');
+      }
+
+      return provider(ensembleId, guacamoleNetwork, ingressNetwork);
+    });
 
     return this;
   }
@@ -140,20 +162,16 @@ export class GuacamoleEnsemble implements Ensemble {
    *
    * @param provider - A function that returns a map of fixture services ready to be started.
    */
-  public withFixtureServices(...provider: FixtureServiceProvider[]): this {
-    // Wrap the fixture provider with a service provider that provides the
-    // fixture network.
-    const serviceProviders: EnsembleServiceProvider[] = provider.map(
-      (fixtureProvider) => (ensembleId, networks) => {
-        const fixtureNetwork = networks.get('fixtures');
-        if (!fixtureNetwork) {
-          throw new EnsembleError('Fixtures network not found');
-        }
-
-        return fixtureProvider(ensembleId, fixtureNetwork);
+  public withFixtureService(provider: FixtureServiceProvider): this {
+    // Wrap the fixture services provider with a function that provides the fixtures network.
+    this.withServices((ensembleId, networks) => {
+      const fixtureNetwork = networks.get('fixtures');
+      if (!fixtureNetwork) {
+        throw new EnsembleError('Fixtures network not found');
       }
-    );
-    this.withServices(...serviceProviders);
+
+      return provider(ensembleId, fixtureNetwork);
+    });
 
     return this;
   }
