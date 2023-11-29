@@ -1,22 +1,25 @@
-import { EnsembleNetworksProvider } from '../ensemble';
 import { Network } from 'testcontainers';
+import { EnsembleNetworkProvider } from '../ensemble';
 
-/**
- * Guacamole network names.
- */
-export type GuacamoleNetworkNames = 'ingress' | 'guacamole' | 'fixtures';
+export const guacamoleNetwork: EnsembleNetworkProvider = (id) => [
+  'guacamole',
+  new Network(`guacamole-${id}`),
+];
 
-export type GuacamoleNetworksProvider =
-  EnsembleNetworksProvider<GuacamoleNetworkNames>;
+export const ingressNetwork: EnsembleNetworkProvider = (id) => [
+  'ingress',
+  new Network(`ingress-${id}`),
+];
+
+export const fixturesNetwork: EnsembleNetworkProvider = (id) => [
+  'fixtures',
+  new Network(`fixtures-${id}`),
+];
 
 /**
  * A function that returns the Guacamole ensemble map of networks ready to
  * be started.
  */
-export const defaultNetworks: GuacamoleNetworksProvider = (id) => {
-  const networks = new Map<GuacamoleNetworkNames, Network>();
-  networks.set('guacamole', new Network(`guacamole-${id}`));
-  networks.set('ingress', new Network(`ingress-${id}`));
-  networks.set('fixtures', new Network(`fixtures-${id}`));
-  return networks;
-};
+export function defaultNetworks(): EnsembleNetworkProvider[] {
+  return [guacamoleNetwork, ingressNetwork, fixturesNetwork];
+}

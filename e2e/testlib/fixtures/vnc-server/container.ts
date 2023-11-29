@@ -34,6 +34,10 @@ export class VncServerContainer extends GenericContainer {
   /**
    * Build the VNC server image.
    *
+   * This builds the image with the tag `vnc-server:latest` by default. If the
+   * image already exists, it will not be rebuilt unless the `force` parameter
+   * is set to `true`.
+   *
    * @param tag - The tag to set to the image.
    * @param force - Whether to force the image to be built, even if it already
    *                exists.
