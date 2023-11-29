@@ -8,10 +8,14 @@
     "build": "tsc -p tsconfig.testlib.json"
   },
   "dependencies": {
+    "dockerode": "^4.0.0",
     "testcontainers": "https://github.com/LNSD/testcontainers-node/releases/download/testcontainers-v10.4.0/testcontainers-10.4.0.tgz",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "xmlrpc": "^1.3.2"
   },
   "devDependencies": {
-    "@types/uuid": "^9.0.7"
+    "@types/dockerode": "^3.3.23",
+    "@types/uuid": "^9.0.7",
+    "@types/xmlrpc": "^1.3.10"
   }
 }
