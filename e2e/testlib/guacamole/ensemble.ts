@@ -7,7 +7,12 @@ import {
 } from 'testcontainers';
 import { defaultNetworks } from './networks';
 import { v4 as uuid } from 'uuid';
-import { defaultServices } from './services';
+import {
+  defaultGuacdService,
+  defaultServices,
+  FixtureServiceProvider,
+  GuacdServiceProvider,
+} from './services';
 import {
   Ensemble,
   EnsembleError,
@@ -15,11 +20,6 @@ import {
   EnsembleServiceProvider,
   StartedEnsemble,
 } from '../ensemble';
-
-export type FixtureServiceProvider = (
-  ensembleId: string,
-  fixtureNetwork: StartedNetwork
-) => [string, TestContainer];
 
 /**
  * Start sequentially all the networks in the ensemble.
@@ -104,7 +104,34 @@ export class GuacamoleEnsemble implements Ensemble {
    * Set the default ensemble services provider.
    */
   public withDefaultServices(): this {
+    this.withGuacdService(defaultGuacdService);
     this.withServices(...defaultServices());
+    return this;
+  }
+
+  /**
+   * Set the guacd service provider.
+   *
+   * @param provider - A function that returns a guacd service ready to be started.
+   */
+  public withGuacdService(provider: GuacdServiceProvider): this {
+    // Wrap the guacd provider with a service provider that provides the
+    // guacamole and fixtures networks.
+    const serviceProvider: EnsembleServiceProvider = (ensembleId, networks) => {
+      const guacamoleNetwork = networks.get('guacamole');
+      if (!guacamoleNetwork) {
+        throw new EnsembleError('Guacamole network not found');
+      }
+
+      const fixturesNetwork = networks.get('fixtures');
+      if (!fixturesNetwork) {
+        throw new EnsembleError('Fixtures network not found');
+      }
+
+      return provider(ensembleId, guacamoleNetwork, fixturesNetwork);
+    };
+    this.withServices(serviceProvider);
+
     return this;
   }
 

@@ -4,22 +4,24 @@ import {
   GuacClientContainer,
   UserMappingXmlAuth,
 } from '@guacamole-tests/guacamole-client/testlib/container';
-import { Wait } from 'testcontainers';
+import { StartedNetwork, TestContainer, Wait } from 'testcontainers';
 
-export const defaultGuacdService: EnsembleServiceProvider = (
+export type FixtureServiceProvider = (
+  ensembleId: string,
+  fixtureNetwork: StartedNetwork
+) => [string, TestContainer];
+
+export type GuacdServiceProvider = (
+  ensembleId: string,
+  guacamoleNetwork: StartedNetwork,
+  fixturesNetwork: StartedNetwork
+) => [string, TestContainer];
+
+export const defaultGuacdService: GuacdServiceProvider = (
   ensembleId,
-  networks
+  guacamoleNetwork,
+  fixturesNetwork
 ) => {
-  const guacamoleNetwork = networks.get('guacamole');
-  if (!guacamoleNetwork) {
-    throw new Error(`Guacamole network not found in the provided networks`);
-  }
-
-  const fixturesNetwork = networks.get('fixtures');
-  if (!fixturesNetwork) {
-    throw new Error(`Fixtures network not found in the provided networks`);
-  }
-
   const guacd = new GuacdContainer()
     .withName(`guac-proxy-${ensembleId}`)
     .withNetwork(guacamoleNetwork)
@@ -68,5 +70,5 @@ export const defaultGuacamoleClientService: EnsembleServiceProvider = (
  * be started.
  */
 export function defaultServices(): EnsembleServiceProvider[] {
-  return [defaultGuacdService, defaultGuacamoleClientService];
+  return [defaultGuacamoleClientService];
 }
