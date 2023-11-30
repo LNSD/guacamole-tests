@@ -60,7 +60,7 @@ session.tabsAttachArea:	Window
 session.forcePseudoTransparency:	false
 session.keyFile:	~/.fluxbox/keys
 session.cacheMax:	200
-session.styleFile:	/usr/share/fluxbox/styles//ubuntu-light
+session.styleFile: /usr/share/fluxbox/styles/ubuntu-light
 session.colorsPerChannel:	4
 session.tabPadding:	0
 session.autoRaiseDelay:	250
