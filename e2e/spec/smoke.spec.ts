@@ -1,6 +1,9 @@
 import { GuacamoleEnsemble } from '@testlib/guacamole';
 import { Wait } from 'testcontainers';
-import { VncServerContainer } from '@testlib/fixtures/vnc-server';
+import {
+  VncServerContainer,
+  Wait as Wait2,
+} from '@testlib/fixtures/vnc-server';
 import { StartedEnsemble } from '@testlib/ensemble';
 
 jest.setTimeout(120_000); // 120 seconds
@@ -55,5 +58,37 @@ describe('Guacamole ensemble start and stop', () => {
 
     /// Then
     expect(ensemble.isStarted()).toBe(false);
+  });
+});
+
+describe('VNC server fixture', () => {
+  it('should wait for all processes to start', async () => {
+    /// When
+    const vncServer = await new VncServerContainer()
+      .withExposedPorts(
+        5900, // VNC
+        9090 // Supervisord
+      )
+      .withWaitStrategy(
+        Wait.forAll([
+          Wait.forListeningPorts(),
+          Wait2.forSupervisor(9090),
+          Wait2.forSupervisorProcesses(
+            9090,
+            'xvfb',
+            'pulseaudio',
+            'x11vnc',
+            'fluxbox',
+            'chrome'
+          ),
+        ])
+      )
+      .start();
+
+    /// Then
+    expect(vncServer.getId()).not.toBeFalsy();
+
+    /// Cleanup
+    await vncServer.stop();
   });
 });
