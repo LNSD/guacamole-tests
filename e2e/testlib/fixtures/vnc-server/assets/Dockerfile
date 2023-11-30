@@ -6,9 +6,10 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     curl ca-certificates gnupg \
     supervisor \
-    xvfb x11vnc \
+    xvfb x11vnc xcompmgr \
     pulseaudio \
     fluxbox \
+    x11-utils xdg-utils eterm \
     wmctrl \
     x11-apps \
   && apt-get clean \
@@ -30,7 +31,8 @@ RUN adduser --disabled-password --system chrome \
 # Add configuration files
 ADD default.pa /etc/pulse/default.pa
 ADD fluxbox_init /etc/fluxbox_init
-ADD master_preferences /opt/google/chrome/
+ADD wallpaper.png /usr/share/images/fluxbox/ubuntu-light.png
+ADD master_preferences /opt/google/chrome/master_preferences
 ADD supervisord.conf /etc/supervisord.conf
 
 CMD [ "/usr/bin/supervisord", "-c", "/etc/supervisord.conf" ]
