@@ -29,17 +29,20 @@ jobs:
       - name: Run linter
         run: npm run lint:ci
 
+      - name: Install end-to-end tests dependencies
+        run: npx playwright install --with-deps chromium
+
       - name: Run modules smoke tests
         run: npm run test:modules -- --ci --runInBand --testNamePattern='@smoke'
 
       - name: Run end-to-end smoke tests
-        run: npm run test:e2e -- --ci --runInBand --testNamePattern='@smoke'
+        run: npm run test:e2e -- --grep='@smoke'
 
       - name: Run modules sanity tests
         run: npm run test:modules -- --ci --runInBand --testNamePattern='@sanity'
 
       - name: Run end-to-end sanity tests
-        run: npm run test:e2e -- --ci --runInBand --testNamePattern='@sanity'
+        run: npm run test:e2e -- --grep='@sanity'
 
       - name: Run modules tests
         if: github.event_name == 'push' && (contains(github.ref, 'main') || contains(github.ref, 'renovate/lock-file-maintenance'))
@@ -47,4 +50,4 @@ jobs:
 
       - name: Run end-to-end tests
         if: github.event_name == 'push' && (contains(github.ref, 'main') || contains(github.ref, 'renovate/lock-file-maintenance'))
-        run: npm run test:e2e -- --ci --runInBand --testNamePattern='^((?!@smoke|@sanity).)*$'
+        run: npm run test:e2e -- --grep-invert='@smoke|@sanity'

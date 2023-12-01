@@ -139,5 +139,9 @@ out
 # Nx
 .nx/cache
 
+# Playwright
+test-results/
+playwright-report/
+
 ### Project specific
 /dist

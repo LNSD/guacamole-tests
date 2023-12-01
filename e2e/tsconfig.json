@@ -12,7 +12,10 @@
     },
     {
       "path": "tsconfig.spec.json"
+    },
+    {
+      "path": "spec/tsconfig.json"
     }
   ],
-  "exclude": ["jest.config.ts"]
+  "exclude": ["playwright.config.ts"]
 }

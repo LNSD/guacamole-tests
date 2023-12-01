@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../tsconfig.spec.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@testlib/*": [ "../testlib/*" ]
+    },
+  },
+}
