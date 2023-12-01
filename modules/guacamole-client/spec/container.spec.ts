@@ -5,7 +5,7 @@ import { v4 as uuid } from 'uuid';
 
 jest.setTimeout(120_000); // 2 minutes
 
-describe('Guacamole client container', () => {
+describe('Guacamole client container @smoke', () => {
   it('should be able start a Guacamole client container', async () => {
     /// Given
     const authConf = renderUserMappingConf([]);

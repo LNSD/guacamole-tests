@@ -4,7 +4,7 @@ import { GuacdContainer } from '@testlib/container';
 
 jest.setTimeout(120_000); // 2 minutes
 
-describe('Guacamole server (guacd) container', () => {
+describe('Guacamole server (guacd) container @smoke', () => {
   it('should be able start a container', async () => {
     /// Given
     const containerName = `guac-server-${uuid()}`;
