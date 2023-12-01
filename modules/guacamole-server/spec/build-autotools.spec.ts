@@ -10,7 +10,7 @@ const GUAC_SERVER_GIT_REPO_URL =
 jest.setTimeout(120_000); // 120 seconds
 
 describe('autotools build system', () => {
-  it('should configure and build guacd', async () => {
+  it('should configure and build guacd @sanity', async () => {
     /// Given
     const builder = await newBuilder({
       buildSystem: 'autotools',
