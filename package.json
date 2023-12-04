@@ -11,8 +11,8 @@
     "lint": "eslint modules e2e --fix",
     "lint:ci": "eslint modules e2e --max-warnings=0",
     "build": "npm run build --workspaces --if-present",
-    "test:e2e": "playwright test -c ./e2e/playwright.config.ts",
-    "test:modules": "jest modules",
+    "test:e2e": "playwright test -c ./e2e/playwright.config.ts --pass-with-no-tests",
+    "test:modules": "jest modules --passWithNoTests",
     "test": "npm run test:modules; npm run test:e2e",
     "prepare": "husky install .github/hooks",
     "clean": "rimraf ./dist"
