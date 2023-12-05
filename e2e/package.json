@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "dockerode": "^4.0.0",
+    "telnet-client": "^2.1.0",
     "testcontainers": "https://github.com/LNSD/testcontainers-node/releases/download/testcontainers-v10.4.0/testcontainers-10.4.0.tgz",
     "uuid": "^9.0.1",
     "xmlrpc": "^1.3.2"
